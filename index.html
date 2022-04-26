@@ -1,42 +1,134 @@
+<!DOCTYPE HTML>
+<!--
+	Capstone Rutgers #14 - Digital Auth using NFC and Blockchain
+-->
 <html>
 
-<body>
-    <script>
-        if (typeof NDEFReader === "undefined") {
-            document.write("NDEFReader is not supported on this browser<br/>");
-        }
+<head>
+	<title>Capstone:NFC & Blockchain Based Authentication</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<link rel="stylesheet" href="assets/css/main.css" />
+	<noscript>
+		<link rel="stylesheet" href="assets/css/noscript.css" />
+	</noscript>
+</head>
+<style>
+	.center {
+		margin: auto;
+		width: 60%;
+		padding: 20px;
+		box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	}
 
-        const ndef = new NDEFReader();
-        ndef.onreading = event => {
-            console.log("NFC", event);
-        };
+	.hideform {
+		display: none;
+	}
+</style>
 
-        function start() {
-            /* Starting a scan stops Android from
-            moving away from the Chrome window when a tag is found*/
-            ndef.scan().then(_ => {
-                // hide 'start' button
-                document.querySelector("#startButton").style.display = "none";
-                document.querySelector("#buttons").style.display = "block";
-            });
-        }
+<body class="is-preload">
 
-        // If we already have permission, start right up!
-        // Otherwise we need the user to press a button
-        navigator.permissions.query({ name: "nfc" }).then(p => {
-            if (p.state === "granted") start();
-        });
+	<!-- Header -->
+	<section id="header">
+		<div class="inner">
+			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+			<p>
+				<i class="material-icons" style="font-size: 100px">nfc</i>
+			</p>
+			<h1>NFC & Blockchain Based Digital Authentication</h1>
+			<p>Using the power of NFC and Blockchain, we have formulated an immutable authentication method for physical
+				goods.</p>
 
-        function send(msg) {
-            ndef.write(msg).then(_ => console.log("Written ", msg));
-        }
-    </script>
-    <button id="startButton" onclick="start()">Start!</button>
-    <div id="buttons" style="display:none">
-        <button onclick="send('red')">Red</button>
-        <button onclick="send('green')">Green</button>
-        <button onclick="send('blue')">Blue</button>
-    </div>
+			<ul class="actions special">
+				<!--	<li><a href="#one" class="button scrolly">SCAN</a></li> -->
+				<div class="center hideform">
+					<form action="/action_page.php">
+
+						<h1>Scan NFC Tag</h1>
+						<img src="https://nfcvcard.com/assets/images/icons/nfc.gif" alt="Nfc Gif" width="80%">
+
+					</form>
+				</div>
+				<button id="show" onclick="readTextRecord()">SCAN</button>
+
+			</ul>
+		</div>
+	</section>
+
+	<section id="footer">
+
+		<ul class="copyright">
+			<li>Capstone Sp22 - 14: Aryan Bindroo, Pavan Meka, Rohan Ravella, Sriram Kannan</li>
+		</ul>
+	</section>
+
+	<!-- Scripts -->
+	<script src="assets/js/jquery.min.js"></script>
+	<script src="assets/js/jquery.scrolly.min.js"></script>
+	<script src="assets/js/browser.min.js"></script>
+	<script src="assets/js/breakpoints.min.js"></script>
+	<script src="assets/js/util.js"></script>
+	<script src="assets/js/main.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script>
+		$('#show').on('click', function () {
+			$('.center').show();
+			$(this).hide();
+		})
+
+		$('#close').on('click', function () {
+			$('.center').hide();
+			$('#show').show();
+		})
+	</script>
+
+	<script>
+		const ndef = new NDEFReader();
+
+		async function startScanning() {
+			await ndef.scan();
+			ndef.onreading = event => {
+				/* handle NDEF messages */
+			};
+		}
+
+		const nfcPermissionStatus = await navigator.permissions.query({ name: "nfc" });
+		if (nfcPermissionStatus.state === "granted") {
+			// NFC access was previously granted, so we can start NFC scanning now.
+			startScanning();
+		} else {
+			// Show a "scan" button.
+			document.querySelector("#scanButton").style.display = "block";
+			document.querySelector("#scanButton").onclick = event => {
+				// Prompt user to allow UA to send and receive info when they tap NFC devices.
+				startScanning();
+			};
+		}
+		function readTextRecord(record) {
+			console.assert(record.recordType === "text");
+			const textDecoder = new TextDecoder(record.encoding);
+			console.log(`Text: ${textDecoder.decode(record.data)} (${record.lang})`);
+
+			if (record.length > 30) {
+				window.location.href = "product.html";
+			}
+
+			if (record.length <= 30) {
+
+				window.location.href = "product.html";
+
+			}
+		}
+
+	</script>
+
+	<script>
+		log = ChromeSamples.log;
+
+		if (!("NDEFReader" in window))
+			ChromeSamples.setStatus("Web NFC is not available. Use Chrome on Android.");
+	</script>
+
 </body>
 
 </html>
