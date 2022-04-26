@@ -1,0 +1,42 @@
+<html>
+
+<body>
+    <script>
+        if (typeof NDEFReader === "undefined") {
+            document.write("NDEFReader is not supported on this browser<br/>");
+        }
+
+        const ndef = new NDEFReader();
+        ndef.onreading = event => {
+            console.log("NFC", event);
+        };
+
+        function start() {
+            /* Starting a scan stops Android from
+            moving away from the Chrome window when a tag is found*/
+            ndef.scan().then(_ => {
+                // hide 'start' button
+                document.querySelector("#startButton").style.display = "none";
+                document.querySelector("#buttons").style.display = "block";
+            });
+        }
+
+        // If we already have permission, start right up!
+        // Otherwise we need the user to press a button
+        navigator.permissions.query({ name: "nfc" }).then(p => {
+            if (p.state === "granted") start();
+        });
+
+        function send(msg) {
+            ndef.write(msg).then(_ => console.log("Written ", msg));
+        }
+    </script>
+    <button id="startButton" onclick="start()">Start!</button>
+    <div id="buttons" style="display:none">
+        <button onclick="send('red')">Red</button>
+        <button onclick="send('green')">Green</button>
+        <button onclick="send('blue')">Blue</button>
+    </div>
+</body>
+
+</html>
