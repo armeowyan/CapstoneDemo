@@ -84,6 +84,14 @@
 	</script>
 
 	<script>
+		function sleep(milliseconds) {
+			const date = Date.now();
+			let currentDate = null;
+			do {
+				currentDate = Date.now();
+			} while (currentDate - date < milliseconds);
+		}
+
 		async function readTag() {
 
 			if ("NDEFReader" in window) {
@@ -94,13 +102,16 @@
 						const decoder = new TextDecoder();
 						var record_result = "";
 						for (const record of event.message.records) {
-							consoleLog("Record type:  " + record.recordType);
-							consoleLog("MIME type:    " + record.mediaType);
 							consoleLog("=== data ===\n" + decoder.decode(record.data));
 							record_result = decoder.decode(record.data)
 						}
-						if (record_result.length > 30) {
+						if (record_result.length >= 30) {
+							sleep(2000)
 							window.location.href = "product.html";
+						}
+						if (record_result.length < 30) {
+							sleep(2000)
+							consoleLog("Error: Public and Private Key NOT FOUND!");
 						}
 
 					}
