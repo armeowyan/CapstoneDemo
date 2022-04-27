@@ -49,7 +49,7 @@
 
 					</form>
 				</div>
-				<button id="show" onclick="readTextRecord()">SCAN</button>
+				<button id="show" onclick="readTag()">SCAN</button>
 
 			</ul>
 		</div>
@@ -83,28 +83,32 @@
 	</script>
 
 	<script>
-		const ndef = new NDEFReader();
-		await ndef.scan();
-		ndef.onreading = (event) => {
-			const externalRecord = event.message.records.find(
-				record => record.type == "example.com:smart-poster"
-			);
+		async function readTag() {
 
-			let action, text;
-
-			for (const record of externalRecord.toRecords()) {
-				if (record.recordType == "text") {
-					const decoder = new TextDecoder(record.encoding);
-					text = decoder.decode(record.data);
-				} else if (record.recordType == ":act") {
-					action = record.data.getUint8(0);
+			if ("NDEFReader" in window) {
+				const ndef = new NDEFReader();
+				try {
+					await ndef.scan();
+					ndef.onreading = event => {
+						const decoder = new TextDecoder();
+						for (const record of event.message.records) {
+							consoleLog("Record type:  " + record.recordType);
+							consoleLog("MIME type:    " + record.mediaType);
+							consoleLog("=== data ===\n" + decoder.decode(record.data));
+						}
+					}
+				} catch (error) {
+					consoleLog(error);
 				}
+			} else {
+				consoleLog("Web NFC is not supported.");
 			}
-			if (record.length >= 10) {
-				window.location.href = "product.html";
-			}
-		};
+		}
 
+		function consoleLog(data) {
+			var logElement = document.getElementById('log');
+			logElement.innerHTML += data + '\n';
+		}
 	</script>
 
 	<script>
