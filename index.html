@@ -84,41 +84,26 @@
 
 	<script>
 		const ndef = new NDEFReader();
+		await ndef.scan();
+		ndef.onreading = (event) => {
+			const externalRecord = event.message.records.find(
+				record => record.type == "example.com:smart-poster"
+			);
 
-		async function startScanning() {
-			await ndef.scan();
-			ndef.onreading = event => {
-				/* handle NDEF messages */
-			};
-		}
+			let action, text;
 
-		const nfcPermissionStatus = await navigator.permissions.query({ name: "nfc" });
-		if (nfcPermissionStatus.state === "granted") {
-			// NFC access was previously granted, so we can start NFC scanning now.
-			startScanning();
-		} else {
-			// Show a "scan" button.
-			document.querySelector("#scanButton").style.display = "block";
-			document.querySelector("#scanButton").onclick = event => {
-				// Prompt user to allow UA to send and receive info when they tap NFC devices.
-				startScanning();
-			};
-		}
-		function readTextRecord(record) {
-			console.assert(record.recordType === "text");
-			const textDecoder = new TextDecoder(record.encoding);
-			console.log(`Text: ${textDecoder.decode(record.data)} (${record.lang})`);
-
-			if (record.length > 30) {
+			for (const record of externalRecord.toRecords()) {
+				if (record.recordType == "text") {
+					const decoder = new TextDecoder(record.encoding);
+					text = decoder.decode(record.data);
+				} else if (record.recordType == ":act") {
+					action = record.data.getUint8(0);
+				}
+			}
+			if (record.length >= 10) {
 				window.location.href = "product.html";
 			}
-
-			if (record.length <= 30) {
-
-				window.location.href = "product.html";
-
-			}
-		}
+		};
 
 	</script>
 
