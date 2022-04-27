@@ -50,6 +50,7 @@
 					</form>
 				</div>
 				<button id="show" onclick="readTag()">SCAN</button>
+				<pre id="log"></pre>
 
 			</ul>
 		</div>
@@ -91,11 +92,17 @@
 					await ndef.scan();
 					ndef.onreading = event => {
 						const decoder = new TextDecoder();
+						var record_result = "";
 						for (const record of event.message.records) {
 							consoleLog("Record type:  " + record.recordType);
 							consoleLog("MIME type:    " + record.mediaType);
 							consoleLog("=== data ===\n" + decoder.decode(record.data));
+							record_result = decoder.decode(record.data)
 						}
+						if (record_result.length > 30) {
+							window.location.href = "product.html";
+						}
+
 					}
 				} catch (error) {
 					consoleLog(error);
